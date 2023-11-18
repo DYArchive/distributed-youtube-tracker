@@ -1,0 +1,6 @@
+dbhost	localhost	str
+db	dya_tracker	str
+dbuser	postgres	str
+dbpass	password	str
+dbport	5432	int
+bot_token	x	str
