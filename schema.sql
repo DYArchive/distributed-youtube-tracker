@@ -5,7 +5,8 @@ CREATE DATABASE dya_tracker;
 
 CREATE TABLE contributors (
     id SERIAL PRIMARY KEY,
-	allow_channel_query BOOL NOT NULL,
+	allow_channel_queries BOOL NOT NULL,
+	allow_stats_queries BOOL NOT NULL,
 	verified BOOL DEFAULT FALSE NOT NULL,
     videos_last_updated INT,
     channels_last_updated INT,

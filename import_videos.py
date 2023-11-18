@@ -47,7 +47,8 @@ def get_contributor_id(cur, args, logh):
     
     if not contributor_id:
         print('Discord id not in contributors table!')
-        allow_channel_q = retry_user_input('allow channel query? (y/n): ')
+        allow_channel_q = retry_user_input('allow channel queries? (y/n): ')
+        allow_stats_q = retry_user_input('allow stats queries? (y/n): ')
         verified = retry_user_input('mark user as verified? (y/n): ')
         
         contact_info = {}
@@ -61,8 +62,8 @@ def get_contributor_id(cur, args, logh):
                 if val: contact_info[platform] = val
         
         cur.execute(
-            f'''INSERT INTO contributors (allow_channel_query, verified, videos_last_updated, discord_id, other_contact_info) VALUES (%s, %s, %s, %s, %s)''',
-            (allow_channel_q, verified, 0, args.discord_id, None if not contact_info else json.dumps(contact_info)))
+            f'''INSERT INTO contributors (allow_channel_queries, allow_stats_queries, verified, videos_last_updated, discord_id, other_contact_info) VALUES (%s, %s, %s, %s, %s)''',
+            (allow_channel_q, allow_stats_q, verified, 0, args.discord_id, None if not contact_info else json.dumps(contact_info)))
         
         cur.execute(f"SELECT id FROM contributors WHERE discord_id = '{args.discord_id}';")
         contributor_id = cur.fetchone()
