@@ -10,6 +10,7 @@ CREATE TABLE contributors (
 	verified BOOL DEFAULT FALSE NOT NULL,
     videos_last_updated INT,
     channels_last_updated INT,
+	name VARCHAR(60) NOT NULL,
     discord_id VARCHAR(20) UNIQUE NOT NULL,
     other_contact_info JSONB
 );
