@@ -36,3 +36,9 @@ allow_stats_queries toggles whether you appear in:
 
 allow_channel_queries toggles whether your archived videos will show up in channel queries,  
 you won't show up as a user who has the video saved unless they do a video query, and if you are the only user then that video won't show up in the channel query  
+
+# notes
+bot requires following discord perms:  
+* read messages  
+* send messages  
+* send files  
