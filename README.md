@@ -1,6 +1,17 @@
 # distributed youtube tracker
 py scripts / db schema / discord bot for tracking youtube archives  
-  
+
+# py scripts
+compile_videos.py -  
+takes input download-archive, infojsons-tarfile, or directory containing infojsons  
+and compiles to a tsv of channels and videos (or just channels)!  
+
+filter_videos_file.py -  
+takes input tsv file, and filter out channels/videos excluded by editing the tsv  
+
+import_videos.py -  
+takes tsv files and imports them into DB, prompts for contact/etc for new users  
+
 # bot commands
  * !tracker help
 	* `print this help message`
