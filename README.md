@@ -42,3 +42,8 @@ bot requires following discord perms:
 * read messages  
 * send messages  
 * send files  
+
+# todo
+* add user signup through DM
+* add tsv ingestion through DM
+* allow user modifying of allow_queries flags
