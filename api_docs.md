@@ -88,6 +88,3 @@ body:
 
 ## GET `/api/authorize/{discord_id}`
 create/fetch api key for user from database  
-
-## GET `/api/stats`
-query database for stats  
