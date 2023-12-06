@@ -225,7 +225,7 @@ def query_channel(command, config):
         
         for v_id, video in videos.items():
             # write video info, and contributor details
-            fbin.write(f'{video["video_id"]} - {video["title"]}\n'.encode('utf-8'))
+            fbin.write(f'{video["video_id"]} - {video["title"] or "NO TITLE IN DATABASE"}\n'.encode('utf-8'))
             fbin.write(f'users: {", ".join([contributors[c]["name"] for c in video_contributions[v_id]])}\n\n'.encode('utf-8'))
         
         # write info for each contributor
@@ -276,7 +276,7 @@ def query_video(command, config):
         else:
             contributors = {}
         
-        message = f'''{len(contributors)} users have video `{video['video_id']}` - `{video['title']}`'''
+        message = f'''{len(contributors)} users have video `{video['video_id']}` - `{video['title']  or "NO TITLE IN DATABASE"}`'''
         
         if len(contributors) > 0:
             fbin = BytesIO()

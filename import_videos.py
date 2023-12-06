@@ -117,45 +117,59 @@ def insert_maintained_channels(channels, cur, args, contributor_id, logh, chunks
 def insert_videos_and_channels(videos, channels, cur, args, contributor_id, logh, chunksize=100):
     # insert channels
     channel_id_lookup = {}
-    affected_channel_rows = 0
+    updated_channel_rows = 0
+    inserted_channel_rows = 0
     channel_ids = list(channels.keys())
     for i in range(0, len(channel_ids), chunksize):
         chunk = channel_ids[i:i+chunksize]
         
         # insert channels
         psycopg2.extras.execute_values(
-            cur, '''INSERT INTO channels (channel_id, title) VALUES %s
-            ON CONFLICT (channel_id) DO UPDATE SET title = COALESCE(EXCLUDED.title, channels.title)''',
-            [(ci, channels[ci]['t']) for ci in chunk if ci != None])
-        affected_channel_rows += cur.rowcount
+            cur, '''INSERT INTO channels (channel_id) VALUES %s ON CONFLICT DO NOTHING''',
+            [(ci,) for ci in chunk if ci != None])
+        inserted_channel_rows += cur.rowcount
         
         # fetch channel ids
         psycopg2.extras.execute_values(
             cur, '''SELECT channel_id, id FROM channels WHERE channel_id IN (%s)''',
             [(c,) for c in chunk], template='(%s)')
         channel_id_lookup.update({row[0]: row[1] for row in cur.fetchall()})
-    echo_msg(f'inserted/updated {affected_channel_rows} channels', logh)
+        
+        # insert channel titles
+        psycopg2.extras.execute_values(
+            cur, '''INSERT INTO titles_c (time_added, channel_id, contributor_id, title) VALUES %s ON CONFLICT DO NOTHING''',
+            [(time.time(), channel_id_lookup[ci], contributor_id, channels[ci]['t']) for ci in chunk if ci != None])
+        updated_channel_rows += cur.rowcount
+        
+    echo_msg(f'inserted/updated {inserted_channel_rows}/{updated_channel_rows} channels', logh)
     
     # insert videos
     video_id_lookup = {}
-    affected_video_rows = 0
+    updated_video_rows = 0
+    inserted_video_rows = 0
     video_ids = list(videos.keys())
     for i in range(0, len(video_ids), chunksize):
         chunk = video_ids[i:i+chunksize]
         
         # insert videos
         psycopg2.extras.execute_values(
-            cur, '''INSERT INTO videos (video_id, channel_id, title) VALUES %s
-            ON CONFLICT (video_id) DO UPDATE SET (title, channel_id) = (COALESCE(EXCLUDED.title, videos.title), COALESCE(EXCLUDED.channel_id, videos.channel_id))''',
-            [(vi, channel_id_lookup.get(videos[vi]['c']), videos[vi]['t']) for vi in chunk if vi != None])
-        affected_video_rows += cur.rowcount
+            cur, '''INSERT INTO videos (video_id, channel_id) VALUES %s
+            ON CONFLICT (video_id) DO UPDATE SET channel_id = COALESCE(EXCLUDED.channel_id, videos.channel_id)''',
+            [(vi, channel_id_lookup.get(videos[vi]['c'])) for vi in chunk if vi != None])
+        inserted_video_rows += cur.rowcount
         
         # fetch video ids
         psycopg2.extras.execute_values(
             cur, '''SELECT video_id, id FROM videos WHERE video_id IN (%s)''',
             [(vi,) for vi in chunk], template='%s')
         video_id_lookup.update({row[0]: row[1] for row in cur.fetchall()})
-    echo_msg(f'inserted/updated {affected_video_rows} videos', logh)
+        
+        # insert video titles
+        psycopg2.extras.execute_values(
+            cur, '''INSERT INTO titles_v (time_added, video_id, contributor_id, title) VALUES %s ON CONFLICT DO NOTHING''',
+            [(time.time(), video_id_lookup[vi], contributor_id, videos[vi]['t']) for vi in chunk if vi != None])
+        updated_video_rows += cur.rowcount
+    echo_msg(f'inserted/updated {inserted_video_rows}/{updated_video_rows} videos', logh)
     
     # compile and insert format_ids
     format_ids = list({v['f'] for v in videos.values() if v['f'] != None})
