@@ -1,5 +1,5 @@
 # distributed youtube tracker
-py scripts / db schema / discord bot for tracking youtube archives  
+py scripts / db schema / discord bot / api for tracking youtube archives  
 
 # py scripts
 compile_videos.py -  
