@@ -2,15 +2,16 @@
  * !tracker help
 	* `print this help message`
  
- * !tracker stats
-	* `print statistics`
- 
- * !tracker leaderboard
-	* `print leaderboard of saved videos`
- 
  * !tracker video {video id}
 	* `query DB for users who have video saved`
  
  * !tracker channel {channel id}
 	* `query DB for channel maintainers and for saved channel videos`
+
+ * !tracker signup {nochannels} {nostats}
+	* `signup for an api key to contribute to the tracker`
+	* `optional arguments: nochannels and nostats; e.g. !tracker signup nochannels nostats`
+
+ * !tracker delete-account
+	* `delete your account and contributions from the tracker`
 ```

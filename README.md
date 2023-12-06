@@ -26,7 +26,7 @@ takes tsv files and imports them into DB, prompts for contact/etc for new users
 	* `signup for an api key to contribute to the tracker`
 	* `optional arguments: nochannels and nostats; e.g. !tracker signup nochannels nostats`
 
- * !tracker delete_account
+ * !tracker delete-account
 	* `delete your account and contributions from the tracker`
 
 # scope of allow_channel_queries and allow_stats_queries flags

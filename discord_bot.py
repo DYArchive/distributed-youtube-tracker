@@ -68,7 +68,7 @@ def process_command(message):
     arguments = None
     if re.match(r'^help', command_suffix):
         command.type = 'command.help'
-    elif re.match(r'^delete_account', command_suffix):
+    elif re.match(r'^delete-account', command_suffix):
         command.type = 'command.user_delete'
     elif re.match(r'^signup', command_suffix):
         command.type = 'command.user_signup'
