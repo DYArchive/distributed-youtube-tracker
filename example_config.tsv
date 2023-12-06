@@ -1,6 +1,3 @@
-dbhost	localhost	str
-db	dya_tracker	str
-dbuser	postgres	str
-dbpass	password	str
-dbport	5432	int
+dya_api_root	https://dya-t-api.strangled.net/api/	str
+dya_api_key	x	str
 bot_token	x	str
