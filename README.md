@@ -44,9 +44,8 @@ bot requires following discord perms:
 * send files  
 
 # todo
-* add user signup through DM
-* add tsv ingestion through DM
-* allow user modifying of allow_queries flags
+* add user video/channel wishlist
+* add statistics query
 
 # api architecture
 nginx -> gunicorn -> fastapi -> postgres
