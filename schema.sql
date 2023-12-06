@@ -80,4 +80,6 @@ GRANT INSERT ON channels, videos, contributions_c, contributions_v, titles_c, ti
 GRANT UPDATE ON videos, titles_c, titles_v, contributors, contributions_c, contributions_v TO dya_tracker_api;
 GRANT UPDATE ON channels_id_seq, videos_id_seq, contributors_id_seq, formats_id_seq TO dya_tracker_api;
 GRANT DELETE ON contributions_c, contributions_v, contributors, api_keys TO dya_tracker_api;
+
+
 ALTER USER dya_tracker_api WITH PASSWORD 'default_password';
