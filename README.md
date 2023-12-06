@@ -45,7 +45,7 @@ bot requires following discord perms:
 
 # todo
 * add user video/channel wishlist
-* add statistics query
+* add statistics/leaderboard queries
 
 # api architecture
 nginx -> gunicorn -> fastapi -> postgres
