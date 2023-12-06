@@ -47,3 +47,6 @@ bot requires following discord perms:
 * add user signup through DM
 * add tsv ingestion through DM
 * allow user modifying of allow_queries flags
+
+# api architecture
+nginx -> gunicorn -> fastapi -> postgres

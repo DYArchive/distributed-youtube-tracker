@@ -1,0 +1,7 @@
+{
+	"password": "default_password",
+	"user": "dya_tracker_api",
+	"host": "localhost",
+	"port": 5432,
+	"table": "dya_tracker"
+}
