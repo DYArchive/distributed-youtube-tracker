@@ -88,3 +88,6 @@ body:
 
 ## GET `/api/authorize/{discord_id}`
 create/fetch api key for user from database  
+
+# api architecture
+nginx -> gunicorn -> fastapi -> postgres

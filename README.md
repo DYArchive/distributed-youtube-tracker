@@ -23,14 +23,14 @@ takes tsv files and imports them into DB, prompts for contact/etc for new users
 	* `query DB for channel maintainers and for saved channel videos`
 
  * !tracker signup {nochannels} {nostats}
-	* signup for an api key to contribute to the tracker
-	* optional arguments: nochannels and nostats; e.g. !tracker signup nochannels nostats
+	* `signup for an api key to contribute to the tracker`
+	* `optional arguments: nochannels and nostats; e.g. !tracker signup nochannels nostats`
 
  * !tracker delete_account
-	* delete your account and contributions from the tracker
+	* `delete your account and contributions from the tracker`
 
 # scope of allow_channel_queries and allow_stats_queries flags
-## stats are not yet implemented
+**stats are not yet implemented**
 allow_stats_queries toggles whether you appear in:  
 * total videos in `!tracker stats`  
 * total size in `!tracker stats`  
@@ -49,5 +49,3 @@ bot requires following discord perms:
 * add user video/channel wishlist
 * add statistics/leaderboard queries
 
-# api architecture
-nginx -> gunicorn -> fastapi -> postgres
