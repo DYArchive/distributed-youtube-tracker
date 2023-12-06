@@ -15,13 +15,13 @@ fetch video id/title/channel/list of contributions
 fetch channel id/title/list of channel maintainers  
 
 ## GET `/api/channelvideos/{channel}`
-fetch channel id/title/list of channel's videos/list of video contributors
-note: videos only contributed by a user who doesn't allow channel queries will not have the video appear
+fetch channel id/title/list of channel's videos/list of video contributors  
+note: videos only contributed by a user who doesn't allow channel queries will not have the video appear  
 
-## POST `/api/submit_channels`
-submit channel ids/titles/notes and mark user as maintainer of channels
-limit of 500 channels per request
-body:
+## POST `/api/submit_channels`  
+submit channel ids/titles/notes and mark user as maintainer of channels  
+limit of 500 channels per request  
+body:  
 ```json
 [
 	{
@@ -32,10 +32,10 @@ body:
 ]
 ```
 
-## POST `/api/submit_videos`
-submit video ids/titles/channels/size/format and mark user as contributor of videos
-limit of 500 videos per request
-body:
+## POST `/api/submit_videos`  
+submit video ids/titles/channels/size/format and mark user as contributor of videos  
+limit of 500 videos per request  
+body:  
 ```json
 [
 	{
@@ -50,24 +50,24 @@ body:
 ```
 
 ## GET `/api/my_videos?limit=500&offset=0`
-fetch list of contributed videos, supports pagination
-limit of 500 videos per request
-use `nextOffset` variable for pagination
+fetch list of contributed videos, supports pagination  
+limit of 500 videos per request  
+use `nextOffset` variable for pagination  
 
 ## GET `/api/my_channels?limit=500&offset=0`
-fetch list of maintained channels, supports pagination
-limit of 500 channels per request
-use `nextOffset` variable for pagination
+fetch list of maintained channels, supports pagination  
+limit of 500 channels per request  
+use `nextOffset` variable for pagination  
 
 ## DELETE `/api/my_videos/{video}`
-delete video from your video contributions
+delete video from your video contributions  
 
 ## DELETE `/api/my_channels/{channel}`
-delete video from your maintained channels
+delete video from your maintained channels  
 
 ## POST `/api/delete_all`
-delete all video/channel contributions (doesn't remove ids or titles from database)
-body:
+delete all video/channel contributions (doesn't remove ids or titles from database)  
+body:  
 ```json
 {"confirm": true}
 ```
@@ -75,8 +75,8 @@ body:
 # Private endpoints
 
 ## POST `/api/signup`
-register discord user
-body:
+register discord user  
+body:  
 ```json
 {
 	"discord_id": 0,
@@ -87,7 +87,7 @@ body:
 ```
 
 ## GET `/api/authorize/{discord_id}`
-create/fetch api key for user from database
+create/fetch api key for user from database  
 
 ## GET `/api/stats`
-query database for stats
+query database for stats  
