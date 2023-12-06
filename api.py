@@ -692,6 +692,43 @@ async def authorize_contributor(request: Request, discord_id: int, db: databases
             '/my_channels/{channelpath:str}', '/delete_all']
         }, status_code=200)
 
+@app.post('/delete_account')
+@limiter.limit('2/minute')
+async def delete_contributor(request: Request, db: databases.Database = Depends(get_database)):
+    # assert db conn
+    await db.connect()
+    
+    contributor_id = await verify_api_key(db, get_api_key(request), 'allow_submit_contributions')
+    if type(contributor_id) != int:
+        return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
+    
+    # validate body
+    try:
+        jsonDat = await request.json()
+    except json.decoder.JSONDecodeError:
+        return JSONResponse({'error': 'malformed body'}, status_code=400)
+    
+    if not jsonDat.get('confirm') == True:
+        return JSONResponse({'error': '`confirm` is not `true`'}, status_code=403)
+    
+    # delete videos
+    await db.execute(query='DELETE FROM contributions_v WHERE contributor_id = :cnid', values={
+        'cnid': contributor_id})
+    
+    # delete channels
+    await db.execute(query='DELETE FROM contributions_c WHERE contributor_id = :cnid', values={
+        'cnid': contributor_id})
+    
+    # delete api key
+    await db.execute(query='DELETE FROM api_keys WHERE allow_submit_contributions = :cnid', values={
+        'cnid': contributor_id})
+    
+    # delete contributor
+    await db.execute(query='DELETE FROM contributors WHERE id = :cnid', values={
+        'cnid': contributor_id})
+    
+    return JSONResponse({'success': True}, status_code=200)
+
 @app.on_event('shutdown')
 async def shutdown_event():
     await database.disconnect()
