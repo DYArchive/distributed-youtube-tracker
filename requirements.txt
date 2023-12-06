@@ -1,3 +1,4 @@
+aiohttp
 argparse
 asyncpg
 databases
