@@ -23,13 +23,15 @@ submit channel ids/titles/notes and mark user as maintainer of channels
 limit of 500 channels per request  
 body:  
 ```json
-[
+{
+	"channels": [
 	{
 		"id": "uAXFkgsw1L7xaCfnd5JJOw",
 		"title": "Rick Astley",
 		"note": "started archiving in 2019"
 	}
 ]
+}
 ```
 
 ## POST `/api/submit_videos`  
@@ -37,7 +39,8 @@ submit video ids/titles/channels/size/format and mark user as contributor of vid
 limit of 500 videos per request  
 body:  
 ```json
-[
+{
+	"videos": [
 	{
 		"id": "dQw4w9WgXcQ",
 		"title": "Rick Astley - Never Gonna Give You Up (Official Music Video)",
@@ -47,6 +50,7 @@ body:
 		"format_id": "616-dash+251-dash"
 	}
 ]
+}
 ```
 
 ## GET `/api/my_videos?limit=500&offset=0`
