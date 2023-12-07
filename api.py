@@ -262,10 +262,9 @@ async def submit_channels(request: Request, db: databases.Database = Depends(get
     except json.decoder.JSONDecodeError:
         return JSONResponse({'error': 'malformed body'}, status_code=400)
     
-    if list(jsonDat.keys()) != ['channels']:
+    if type(jsonDat) != dict or list(jsonDat.keys()) != ['channels']:
         return JSONResponse({'error': 'missing `channels` key or invalid keys present'}, status_code=400)
-    
-    if len(jsonDat['channels']) > 500:
+    elif len(jsonDat['channels']) > 500:
         return JSONResponse({'error': 'maxiumum of 500 channels per api call'}, status_code=400)
     
     # process channels
@@ -344,10 +343,9 @@ async def submit_videos(request: Request, db: databases.Database = Depends(get_d
     except json.decoder.JSONDecodeError:
         return JSONResponse({'error': 'malformed body'}, status_code=400)
     
-    if list(jsonDat.keys()) != ['videos']:
+    if type(jsonDat) != dict or list(jsonDat.keys()) != ['videos']:
         return JSONResponse({'error': 'missing `videos` key or invalid keys present'}, status_code=400)
-    
-    if len(jsonDat['videos']) > 500:
+    elif len(jsonDat['videos']) > 500:
         return JSONResponse({'error': 'maxiumum of 500 videos per api call'}, status_code=400)
     
     # process videos
