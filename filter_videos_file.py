@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 def echo_msg(msg, fh):
     fh.write(f'{msg}\n'); print(msg)
@@ -76,6 +77,8 @@ if __name__ == '__main__':
     parser.add_argument('infile', help='input videos/channels tsv')
     parser.add_argument('outfile', help='output filtered tsv')
     parser.add_argument('--channels', action='store_true', help='only copy channel rows')
+    if len(sys.argv)==1:
+        parser.print_help(sys.stderr); exit()
     args = parser.parse_args()
     
     main(args)

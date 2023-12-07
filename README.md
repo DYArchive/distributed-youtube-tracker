@@ -10,7 +10,7 @@ filter_videos_file.py -
 takes input tsv file, and filter out channels/videos excluded by editing the tsv  
 
 import_videos.py -  
-takes tsv files and imports them into tracker via the API  
+takes tsv files and imports them into tracker via the API (doesn't respect the `include` flag, use `filter_videos_file.py`!  
 
 # bot commands
  * !tracker help

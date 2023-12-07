@@ -3,6 +3,7 @@ import json
 from os import listdir, makedirs
 from os.path import isfile, isdir, split, splitext, join
 import re
+import sys
 import tarfile
 
 is_ij = re.compile(r'.+\.info\.json$', re.IGNORECASE)
@@ -83,6 +84,7 @@ def process_info_jsons(args):
             
             videos[video_id] = {'id': video_id, 'title': video_title, 'channel_id': 'UNSET_CHANNEL_ID', 'format_id': jdat.get('format_id'), 'filesize': jdat.get('filesize')}
             if channel_id:
+                channel_id = 'UC'+channel_id
                 channels[channel_id] = {'id': channel_id, 'title': channel_title}
                 videos[video_id]['channel_id'] = channel_id
         print(f'{len(videos)}/{len(files)}')
@@ -156,6 +158,8 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outfile', help='output videos/channels tsv', default=None)
     parser.add_argument('-u', '--include-unlisted', action='store_true', help='whether to collect unlisted/private/member-only videos (filters 2022+ infojsons only)')
     parser.add_argument('-t', '--exclude-titles', action='store_false', help='whether to collect video titles (infojsons only)')
+    if len(sys.argv)==1:
+        parser.print_help(sys.stderr); exit()
     args = parser.parse_args()
     
     if not args.outfile:
