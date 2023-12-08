@@ -20,6 +20,7 @@ def match_re(string, regex):
 def insert_maintained_channels(channels, args, logh, chunksize=500):
     channel_ids = list(channels.keys())
     for i in range(0, len(channel_ids), chunksize):
+        if i < args.resume-chunksize: continue
         print(f'inserting channels {min(i+chunksize, len(channel_ids)):,}/{len(channel_ids):,}')
         chunk = channel_ids[i:i+chunksize]
         flattened_channels = [
@@ -51,6 +52,7 @@ def insert_maintained_channels(channels, args, logh, chunksize=500):
 def insert_videos_and_channels(videos, channels, args, logh, chunksize=500):
     video_ids = list(videos.keys())
     for i in range(0, len(video_ids), chunksize):
+        if i < args.resume-chunksize: continue
         print(f'inserting videos {min(i+chunksize, len(video_ids)):,}/{len(video_ids):,}')
         chunk = video_ids[i:i+chunksize]
         flattened_videos = [
@@ -156,6 +158,7 @@ if __name__ == '__main__':
     parser.add_argument('-k', '--api-key', help='dya tracker api key', default=None)
     parser.add_argument('--api-root-url', help='dya tracker api url', default='https://dya-t-api.strangled.net/api')
     parser.add_argument('--channels', action='store_true', help='insert all channels from tsv as MAINTAINED channels')
+    parser.add_argument('--resume', default=0, type=int, help='resume inserting videos/channels by skipping first X videos')
     parser.add_argument('-l', '--log-file-fmt', default='./logs/{}.log', help='output fmt for log files (curly braces are discord id), default: ./{}.log')
     if len(sys.argv)==1:
         parser.print_help(sys.stderr); exit()
