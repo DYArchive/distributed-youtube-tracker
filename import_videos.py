@@ -20,7 +20,7 @@ def match_re(string, regex):
 def insert_maintained_channels(channels, args, logh, chunksize=500):
     channel_ids = list(channels.keys())
     for i in range(0, len(channel_ids), chunksize):
-        print(f'inserting channels {min(i+chunksize, len(channel_ids))}/{len(channel_ids)}')
+        print(f'inserting channels {min(i+chunksize, len(channel_ids)):,}/{len(channel_ids):,}')
         chunk = channel_ids[i:i+chunksize]
         flattened_channels = [
             {
@@ -51,7 +51,7 @@ def insert_maintained_channels(channels, args, logh, chunksize=500):
 def insert_videos_and_channels(videos, channels, args, logh, chunksize=500):
     video_ids = list(videos.keys())
     for i in range(0, len(video_ids), chunksize):
-        print(f'inserting videos {min(i+chunksize, len(video_ids))}/{len(video_ids)}')
+        print(f'inserting videos {min(i+chunksize, len(video_ids)):,}/{len(video_ids):,}')
         chunk = video_ids[i:i+chunksize]
         flattened_videos = [
             {
@@ -135,7 +135,7 @@ def main(args):
                         'c': cast_str_as_val(row.get('channel_id')),
                         's': cast_str_as_val(row.get('filesize'), rtype=int)}
     
-        echo_msg(f'processed {len(channels)} channels, {len(videos)} videos', logh)
+        echo_msg(f'processed {len(channels):,} channels, {len(videos):,} videos', logh)
     
     # remove videos from skipped channels
     # doesn't strip videos without channel ids because an unset channel id == None/null
