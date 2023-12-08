@@ -48,6 +48,6 @@ bot requires following discord perms:
 * send files  
 
 # todo
-* add user video/channel wishlist
+* add user video/channel wishlist (should ping for wishlisted videos newly-added to tracker)
 * add statistics/leaderboard queries
 
