@@ -130,7 +130,7 @@ async def query_channel(command, config):
     if len(videos['videos']) > 0:
         fbin.write(b'Channel videos in DB:\nID | TITLE\n')
         for v in videos['videos']:
-            fbin.write(f'{v["id"]} - {v["title"]}\n'.encode('utf-8'))
+            fbin.write(f'{v["id"]} - {(v["title"] or "No title in database")[:255]}\n'.encode('utf-8'))
             fbin.write(b'users with video saved:\n'+ ', '.join([
                 c["name"] for c in v['contributors']
             ]).encode('utf-8') + b'\n\n')
@@ -149,7 +149,7 @@ async def query_channel(command, config):
         fbin.seek(0)
         files.append(discord.File(fbin, filename=f'{channel_id[1]}_contributions.txt'))
     
-    message = f'found {videos["count"]}{"+" if videos["count"] == 500 else ""} videos, {len(maintainers["contributions"])} channel maintainers for channel `UC{maintainers["channel"]["id"]}` - `{maintainers["channel"]["title"]}`'
+    message = f'found {videos["count"]}{"+" if videos["count"] == 500 else ""} videos, {len(maintainers["contributions"])} channel maintainers for channel `UC{maintainers["channel"]["id"]}` - `{(maintainers["channel"]["title"] or "No title in database")[:255]}`'
     
     return message, files
 
@@ -167,7 +167,7 @@ async def query_video(command, config):
     
     if status == 200:
         data = json.loads(data)
-        message = f'{len(data["contributions"])} users have video `{data["video"]["id"]}` - `{data["video"]["title"][:255]}`'
+        message = f'{len(data["contributions"])} users have video `{data["video"]["id"]}` - `{(data["video"]["title"] or "No title in database")[:255]}`'
         if len(data['contributions']) > 0:
             fbin = BytesIO()
             fbin.write('NAME\tDISCORD ID:\n'.encode('utf-8'))
