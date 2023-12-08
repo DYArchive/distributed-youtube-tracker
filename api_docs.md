@@ -1,5 +1,5 @@
 # why aren't you using pydantic / sqlalchemy to generate docs automatically?  
-lazy  
+lazy, will remake eventually  
 
 # notes
 * channel IDs are stripped of their `UC` prefix
@@ -21,6 +21,7 @@ note: videos only contributed by a user who doesn't allow channel queries will n
 ## POST `/api/submit_channels`  
 submit channel ids/titles/notes and mark user as maintainer of channels  
 limit of 500 channels per request  
+only the `id` key is required, but please include additional data if possible!  
 body:  
 ```json
 {
@@ -37,6 +38,7 @@ body:
 ## POST `/api/submit_videos`  
 submit video ids/titles/channels/size/format and mark user as contributor of videos  
 limit of 500 videos per request  
+only the `id` key is required, but please include additional data if possible!  
 body:  
 ```json
 {
