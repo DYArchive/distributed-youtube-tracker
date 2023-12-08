@@ -170,7 +170,7 @@ async def query_video(command, config):
         message = f'{len(data["contributions"])} users have video `{data["video"]["id"]}` - `{(data["video"]["title"] or "No title in database")[:255]}`'
         if len(data['contributions']) > 0:
             fbin = BytesIO()
-            fbin.write('NAME\tDISCORD ID:\n'.encode('utf-8'))
+            fbin.write('NAME | DISCORD ID:\n'.encode('utf-8'))
             fbin.write('\n'.join([f'''{c["contributor"]["name"]}\t{c["contributor"]["discord_id"]}''' for c in data["contributions"]]).encode('utf-8'))
             fbin.seek(0)
             files.append(discord.File(fbin, filename=f'{data["video"]["id"]}_contributions.txt'))
@@ -236,7 +236,9 @@ async def fetch_apikey(config, user):
     apikey = 'error, unset'
     async with aiohttp.ClientSession() as session:
         status, data = await api_call('authorize', session, config, value = str(user.id))
-        if status != 200:
+        if status == 403:
+            return f'you are not a registered user', None
+        elif status != 200:
             return f'api error; {status} (b)', None
     
     return 'dmed', f'api key: `{json.loads(data)["key"]}`'
