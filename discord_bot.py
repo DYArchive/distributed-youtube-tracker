@@ -75,6 +75,8 @@ def process_command(message):
         data = [s for s in re.match(r'^signup(.*)', command_suffix)[1].strip().split(' ') if s]
         if all(e in ['nostats', 'nochannels'] for e in data): command.arguments = data
         else: command.type = 'command.invalidsyntax'
+    elif re.match(r'^apikey', command_suffix):
+        command.type = 'command.user_request_apikey'
     elif re.match(r'^channel', command_suffix):
         command.type = 'command.query_channel'
         data = re.match(r'^channel(.*)', command_suffix)[1].strip().split(' ')
@@ -230,6 +232,15 @@ async def delete_user(config, user):
     
     return 'user successfully removed from DB'
 
+async def fetch_apikey(config, user):
+    apikey = 'error, unset'
+    async with aiohttp.ClientSession() as session:
+        status, data = await api_call('authorize', session, config, value = str(user.id))
+        if status != 200:
+            return f'api error; {status} (b)', None
+    
+    return 'dmed', f'api key: `{json.loads(data)["key"]}`'
+
 class scdb(discord.Client):
     global permissions
     async def on_ready(self):
@@ -259,6 +270,11 @@ class scdb(discord.Client):
         elif command.type == 'command.user_signup':
             response = await signup_user(command, config, message.author)
             await message.reply(response)
+        elif command.type == 'command.user_request_apikey':
+            response, dm = await fetch_apikey(config, message.author)
+            await message.reply(response)
+            if dm:
+                await message.author.send(dm)
         elif command.type != 'command.none':
             raise Exception(f'invalid command of type {command.type}')
 

@@ -26,6 +26,9 @@ takes tsv files and imports them into tracker via the API (doesn't respect the `
 	* `signup for an api key to contribute to the tracker`
 	* `optional arguments: nochannels and nostats; e.g. !tracker signup nochannels nostats`
 
+ * !tracker apikey
+	* `have bot DM you your api key`
+
  * !tracker delete-account
 	* `delete your account and contributions from the tracker`
 
