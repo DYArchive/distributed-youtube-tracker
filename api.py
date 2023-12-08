@@ -70,8 +70,8 @@ async def fetch_video(request: Request, videopath: str, v: str = None, db: datab
     video = await db.fetch_one(query='''
             SELECT id,
            (SELECT channel_id FROM channels WHERE id = videos.channel_id),
-           (SELECT title FROM titles_v WHERE video_id = videos.id ORDER BY time_added DESC) as title,
-           (SELECT title FROM titles_c WHERE channel_id = videos.channel_id ORDER BY time_added DESC) as channel_title
+           (SELECT title FROM titles_v WHERE video_id = videos.id ORDER BY time_added DESC LIMIT 1) as title,
+           (SELECT title FROM titles_c WHERE channel_id = videos.channel_id ORDER BY time_added DESC LIMIT 1) as channel_title
             FROM videos WHERE video_id = :id''', values={'id': video_id})
     if not video:
         return JSONResponse({'error': 'video not in db'}, status_code=404)
@@ -127,7 +127,7 @@ async def fetch_channel_maintainers(request: Request, channelpath: str, db: data
     # pull channel id from db
     channel = await db.fetch_one(query='''
         SELECT id,
-        (SELECT title FROM titles_c WHERE channel_id = channels.id ORDER BY time_added DESC)
+        (SELECT title FROM titles_c WHERE channel_id = channels.id ORDER BY time_added DESC LIMIT 1)
         FROM channels WHERE channel_id = :id''', values={'id': channel_id})
     if not channel:
         return JSONResponse({'error': 'channel not in db'}, status_code=404)
@@ -180,7 +180,7 @@ async def fetch_channel_videos(request: Request, channelpath: str, db: databases
     
     # pull channel id from db
     channel = await db.fetch_one(query='''
-        SELECT id, (SELECT title FROM titles_c WHERE channel_id = channels.id ORDER BY time_added DESC) FROM channels WHERE channel_id = :id''',
+        SELECT id, (SELECT title FROM titles_c WHERE channel_id = channels.id ORDER BY time_added DESC LIMIT 1) FROM channels WHERE channel_id = :id''',
         values={'id': channel_id})
     if not channel:
         return JSONResponse({'error': 'channel not in db'}, status_code=404)
@@ -481,7 +481,7 @@ async def query_contributor_channels(request: Request, db: databases.Database = 
     rows = await db.fetch_all(query='''
         SELECT
             (SELECT channel_id FROM channels WHERE id = contributions_c.channel_id) as channel_id,
-            (SELECT title FROM titles_c WHERE channel_id = contributions_c.channel_id) as channel_title,
+            (SELECT title FROM titles_c WHERE channel_id = contributions_c.channel_id LIMIT 1) as channel_title,
             note
         FROM contributions_c WHERE contributor_id = :cnid ORDER BY contributions_c.channel_id LIMIT :limit OFFSET :offset''', values={
         'cnid': contributor_id,
@@ -512,9 +512,9 @@ async def query_contributor_videos(request: Request, db: databases.Database = De
     rows = await db.fetch_all(query='''
         SELECT
             (SELECT video_id FROM videos WHERE id = contributions_v.video_id) as id,
-            (SELECT title FROM titles_v WHERE video_id = contributions_v.video_id) as title,
+            (SELECT title FROM titles_v WHERE video_id = contributions_v.video_id LIMIT 1) as title,
             (SELECT (SELECT channel_id FROM channels WHERE id = videos.channel_id) FROM videos WHERE id = contributions_v.video_id) as channel_id,
-            (SELECT (SELECT title FROM titles_c WHERE channel_id = videos.channel_id) FROM videos WHERE id = contributions_v.video_id) as channel_title,
+            (SELECT (SELECT title FROM titles_c WHERE channel_id = videos.channel_id LIMIT 1) FROM videos WHERE id = contributions_v.video_id) as channel_title,
             (SELECT format_string FROM formats WHERE id = contributions_v.format_id) as format_id,
             filesize
         FROM contributions_v WHERE contributor_id = :cnid ORDER BY contributions_v.video_id LIMIT :limit OFFSET :offset''', values={
