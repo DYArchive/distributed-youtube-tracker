@@ -367,7 +367,7 @@ async def submit_videos(request: Request, db: databases.Database = Depends(get_d
         v_id = v_id[1]
         
         if 'channel_id' in v:
-            c_id = match_channel_id.match(v['channel_id'])
+            c_id = match_channel_id.match(v['channel_id'] or '')
             if not c_id:
                 return JSONResponse({'error': f'invalid channel id `{v["channel_id"]}`'}, status_code=400)
             c_id = c_id[1]

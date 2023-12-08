@@ -38,7 +38,7 @@ body:
 ## POST `/api/submit_videos`  
 submit video ids/titles/channels/size/format and mark user as contributor of videos  
 limit of 500 videos per request  
-only the `id` key is required, but please include additional data if possible!  
+only the `id` and `channel_id` keys are required, but please include additional data if possible!  
 body:  
 ```json
 {

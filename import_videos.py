@@ -127,8 +127,8 @@ def main(args):
                         'n': cast_str_as_val(row.get('note'))}
                 elif currentmode == 'v':
                     row = parse_line(line, fields)
-                    if row.get('include') == 'n' or (not row.get('video_id')):
-                        echo_msg(f'skipping video {row.get("video_id")} ({row.get("title")})', logh); continue
+                    if row.get('include') == 'n' or (not row.get('video_id')) or (not row.get('channel_id')):
+                        echo_msg(f'skipping video {row.get("video_id")} ({row.get("title") or "no title"})', logh); continue
                         continue
                     
                     videos[row['video_id']] = {
