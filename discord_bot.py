@@ -98,7 +98,7 @@ async def query_channel(command, config):
     
     channel_id = match_channel.match(command.arguments['channel_id'])
     if not channel_id:
-        message = f"invalid channel id '{command.arguments['channel_id']}'"
+        message = f"invalid channel id `{command.arguments['channel_id']}`"
         return message, files
     
     async with aiohttp.ClientSession() as session:
@@ -108,7 +108,7 @@ async def query_channel(command, config):
         if status == 200:
             maintainers = json.loads(data)
         elif status == 404:
-            return f'channel {channel_id[1]} does not exist in database', files
+            return f'channel `UC{channel_id[1]}` does not exist in database', files
         else:
             return 'api error', files
         
@@ -147,9 +147,9 @@ async def query_channel(command, config):
     
     if len(fbin.read(1)):
         fbin.seek(0)
-        files.append(discord.File(fbin, filename=f'{channel_id[1]}_contributions.txt'))
+        files.append(discord.File(fbin, filename=f'UC{channel_id[1]}_contributions.txt'))
     
-    message = f'found {videos["count"]}{"+" if videos["count"] == 500 else ""} videos, {len(maintainers["contributions"])} channel maintainers for channel `UC{maintainers["channel"]["id"]}` - `{(maintainers["channel"]["title"] or "No title in database")[:255]}`'
+    message = f'found `{videos["count"]}{"+" if videos["count"] == 500 else ""}` videos, `{len(maintainers["contributions"])}` channel maintainers for channel `UC{maintainers["channel"]["id"]}` - `{(maintainers["channel"]["title"] or "No title in database")[:255]}`'
     
     return message, files
 
@@ -159,7 +159,7 @@ async def query_video(command, config):
     
     video_id = match_video.match(command.arguments['video_id'])
     if not video_id:
-        message = f"invalid video id '{command.arguments['video_id']}'"
+        message = f"invalid video id `{command.arguments['video_id']}`"
         return message, files
     
     async with aiohttp.ClientSession() as session:
@@ -167,7 +167,7 @@ async def query_video(command, config):
     
     if status == 200:
         data = json.loads(data)
-        message = f'{len(data["contributions"])} users have video `{data["video"]["id"]}` - `{(data["video"]["title"] or "No title in database")[:255]}`'
+        message = f'`{len(data["contributions"])}` users have video `{data["video"]["id"]}` - `{(data["video"]["title"] or "No title in database")[:255]}`'
         if len(data['contributions']) > 0:
             fbin = BytesIO()
             fbin.write('NAME | DISCORD ID:\n'.encode('utf-8'))
@@ -175,7 +175,7 @@ async def query_video(command, config):
             fbin.seek(0)
             files.append(discord.File(fbin, filename=f'{data["video"]["id"]}_contributions.txt'))
     elif status == 404:
-        message = f'video {video_id[1]} not in db'
+        message = f'video `{video_id[1]}` not in db'
     else:
         print(status)
         message = 'api call error'
@@ -201,11 +201,11 @@ async def signup_user(command, config, user):
         elif status == 403:
             return 'you are already signed up'
         elif status != 200:
-            return f'api error; {status} (a)'
+            return f'api error; `{status}` (a)'
         
         status, data = await api_call('authorize', session, config, value = str(user.id))
         if status != 200:
-            return f'api error; {status} (b)'
+            return f'api error; `{status}` (b)'
     
     await user.send(f'api key: `{json.loads(data)["key"]}`')
     return 'signed up! I have DMed you your api key'
@@ -239,7 +239,7 @@ async def fetch_apikey(config, user):
         if status == 403:
             return f'you are not a registered user', None
         elif status != 200:
-            return f'api error; {status} (b)', None
+            return f'api error; `{status}`', None
     
     return 'dmed', f'api key: `{json.loads(data)["key"]}`'
 
