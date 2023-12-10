@@ -65,6 +65,14 @@ fetch list of maintained channels, supports pagination
 limit of 500 channels per request  
 use `nextOffset` variable for pagination  
 
+## POST `/api/set_contact_info`
+submit public contact info to the tracker, disables discord id (if present)
+300 char limit, no newlines allowed, set `alternative_contact_info` to `null` to clear contact info
+body:
+```json
+{"alternative_contact_info": "johndoe@gmail.com"}
+```
+
 ## DELETE `/api/my_videos/{video}`
 delete video from your video contributions  
 
@@ -94,6 +102,18 @@ body:
 
 ## GET `/api/authorize/{discord_id}`
 create/fetch api key for user from database  
+
+## POST `/api/signup_nodiscord`
+register user without a discord id (admins only)
+body:
+```json
+{
+	"alternative_contact_info": "johndoe@gmail.com",
+	"name": "audrey",
+	"allow_channel_queries": true,
+	"allow_stats_queries": true
+}
+```
 
 # api architecture
 nginx -> gunicorn -> fastapi -> postgres

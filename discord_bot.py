@@ -75,6 +75,9 @@ def process_command(message):
         data = [s for s in re.match(r'^signup(.*)', command_suffix)[1].strip().split(' ') if s]
         if all(e in ['nostats', 'nochannels'] for e in data): command.arguments = data
         else: command.type = 'command.invalidsyntax'
+    elif re.match(r'^update-contact-info(.*)', command_suffix):
+        command.type = 'command.user_update_contact'
+        command.arguments['contact'] = re.match(r'^update-contact-info(.*)', command_suffix)[1]
     elif re.match(r'^apikey', command_suffix):
         command.type = 'command.user_request_apikey'
     elif re.match(r'^channel', command_suffix):
@@ -124,7 +127,7 @@ async def query_channel(command, config):
     if len(maintainers['contributions']) > 0:
         fbin.write(b'Channel maintainers:\nNAME | DISCORD ID | NOTE\n')
         for c in maintainers['contributions']:
-            fbin.write(f'{c["contributor"]["name"]}\t{c["contributor"]["discord_id"]}\t{c.get("note") or "no note"}\n'.encode('utf-8'))
+            fbin.write(f'{c["contributor"]["name"]}\t{c["contributor"]["discord_id"] or "no discord id"}\t{c.get("note") or "no note"}\n'.encode('utf-8'))
         fbin.write(b'\n')
     
     if len(videos['videos']) > 0:
@@ -136,13 +139,13 @@ async def query_channel(command, config):
             ]).encode('utf-8') + b'\n\n')
         
         # write contributor discord ids
-        contributors = {}
+        contributors = set()
         for v in videos['videos']:
-            contributors.update({c['discord_id']: c['name'] for c in v['contributors']})
+            contributors.update({(c['name'], c['discord_id'], c['alternative_contact_info']) for c in v['contributors']})
         
         if len(contributors) > 0:
-            fbin.write(b'Video contributors:\nNAME | DISCORD ID\n')
-            fbin.write('\n'.join([f'{n}\t{d}' for d, n in contributors.items()]).encode('utf-8'))
+            fbin.write(b'Video contributors:\nNAME | DISCORD ID | CONTACT INFO\n')
+            fbin.write('\n'.join([f'{n}\t{d or "no discord id"}\t{c or ""}' for (n, d, c) in contributors]).encode('utf-8'))
     fbin.seek(0)
     
     if len(fbin.read(1)):
@@ -168,10 +171,12 @@ async def query_video(command, config):
     if status == 200:
         data = json.loads(data)
         message = f'`{len(data["contributions"])}` users have video `{data["video"]["id"]}` - `{(data["video"]["title"] or "No title in database")[:255]}`'
+        if data['video']['channel_id']:
+            message += f'\nChannel: `UC{data["video"]["channel_id"]}` - `{data["video"]["channel_title"] or "no title"}`'
         if len(data['contributions']) > 0:
             fbin = BytesIO()
-            fbin.write('NAME | DISCORD ID:\n'.encode('utf-8'))
-            fbin.write('\n'.join([f'''{c["contributor"]["name"]}\t{c["contributor"]["discord_id"]}''' for c in data["contributions"]]).encode('utf-8'))
+            fbin.write('NAME | DISCORD ID | CONTACT INFO:\n'.encode('utf-8'))
+            fbin.write('\n'.join([f'''{c["contributor"]["name"]}\t{c["contributor"]["discord_id"] or "no discord id"}\t{c["contributor"]["alternative_contact_info"] or ""}''' for c in data["contributions"]]).encode('utf-8'))
             fbin.seek(0)
             files.append(discord.File(fbin, filename=f'{data["video"]["id"]}_contributions.txt'))
     elif status == 404:
@@ -243,6 +248,28 @@ async def fetch_apikey(config, user):
     
     return 'dmed', f'api key: `{json.loads(data)["key"]}`'
 
+async def update_user_contact(command, config, user):
+    contact = command.arguments['contact']
+    if len(contact) > 300:
+        return 'contact info cannot be over 300 chars'
+    elif '\n' in contact:
+        return 'contact info cannot have newlines/line breaks'
+    
+    async with aiohttp.ClientSession() as session:
+        # pull user api key
+        status, data = await api_call('authorize', session, config, value = str(user.id))
+        if status == 403:
+            return f'you are not a registered user'
+        elif status != 200:
+            return f'api error; `{status}`'
+        
+        # update contact
+        resp = await session.post(config['dya_api_root']+'set_contact_info', headers={'Authorization': json.loads(data)['key']}, json={'alternative_contact_info': contact.strip()})
+        if resp.status != 200:
+            return f'api error; `{status}`'
+    
+    return 'successfully updated contact info!'
+
 class scdb(discord.Client):
     global permissions
     async def on_ready(self):
@@ -268,6 +295,9 @@ class scdb(discord.Client):
             await message.reply(response, files=files)
         elif command.type == 'command.user_delete':
             response = await delete_user(config, message.author)
+            await message.reply(response)
+        elif command.type == 'command.user_update_contact':
+            response = await update_user_contact(command, config, message.author)
             await message.reply(response)
         elif command.type == 'command.user_signup':
             response = await signup_user(command, config, message.author)

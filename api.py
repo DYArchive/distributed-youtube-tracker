@@ -86,7 +86,7 @@ async def fetch_video(request: Request, videopath: str, v: str = None, db: datab
     # pull contributor info from db
     # idfk how to fetch multiple rows with `id IN ()` with this lib, I give up..
     for cid in contributions.keys():
-        row = await db.fetch_one(query='SELECT id as contributor_id, name, discord_id FROM contributors WHERE id = (:id)', values={'id': cid})
+        row = await db.fetch_one(query='SELECT id as contributor_id, name, discord_id, alternative_contact_info FROM contributors WHERE id = (:id)', values={'id': cid})
         contributions[row['contributor_id']].update(dict(row))
     
     return JSONResponse({
@@ -96,7 +96,8 @@ async def fetch_video(request: Request, videopath: str, v: str = None, db: datab
                 'filesize': c.get('filesize'),
                 'contributor': {
                     'name': c['name'],
-                    'discord_id': c['discord_id'],
+                    'discord_id': c['discord_id'] if (not c['alternative_contact_info']) else None,
+                    'alternative_contact_info': c['alternative_contact_info']
                 }
             } for c in contributions.values()
         ],
@@ -138,7 +139,7 @@ async def fetch_channel_maintainers(request: Request, channelpath: str, db: data
     
     # pull contributor info from db
     for cid in contributions.keys():
-        row = await db.fetch_one(query='SELECT id as contributor_id, name, discord_id, allow_channel_queries FROM contributors WHERE id = (:id)', values={'id': cid})
+        row = await db.fetch_one(query='SELECT id as contributor_id, name, discord_id, alternative_contact_info, allow_channel_queries FROM contributors WHERE id = (:id)', values={'id': cid})
         contributions[row['contributor_id']].update(dict(row))
     
     return JSONResponse({
@@ -147,7 +148,8 @@ async def fetch_channel_maintainers(request: Request, channelpath: str, db: data
                 'note': c.get('note'),
                 'contributor': {
                     'name': c['name'],
-                    'discord_id': c['discord_id']
+                    'discord_id': c['discord_id'] if (not c['alternative_contact_info']) else None,
+                    'alternative_contact_info': c['alternative_contact_info']
                 }
             } for c in contributions.values() if c['allow_channel_queries']
         ],
@@ -209,7 +211,8 @@ async def fetch_channel_videos(request: Request, channelpath: str, db: databases
                     video_id,
                     contributor_id,
                     (SELECT name FROM contributors WHERE id = contributions_v.contributor_id) as contributor_name,
-                    (SELECT discord_id FROM contributors WHERE id = contributions_v.contributor_id) as contributor_discord_id
+                    (SELECT discord_id FROM contributors WHERE id = contributions_v.contributor_id) as contributor_discord_id,
+                    (SELECT alternative_contact_info FROM contributors WHERE id = contributions_v.contributor_id) as contributor_alternative_contact_info
                 FROM contributions_v
                 WHERE video_id IN ({','.join([str(v) for v in videos.keys()])})
                 AND (SELECT allow_channel_queries FROM contributors WHERE id = contributions_v.contributor_id) IS TRUE;
@@ -220,7 +223,7 @@ async def fetch_channel_videos(request: Request, channelpath: str, db: databases
     # filter contributions without any contributors that allow channel queries
     contributions = {}
     for r in rows:
-        videos[r['video_id']]['contributors'].update({r['contributor_id']: {'name': r['contributor_name'], 'discord_id': int(r['contributor_discord_id'])}})
+        videos[r['video_id']]['contributors'].update({r['contributor_id']: {'name': r['contributor_name'], 'discord_id': r['contributor_discord_id'], 'alternative_contact_info': r['contributor_alternative_contact_info']}})
     videos = {k: v for k, v in videos.items() if len(v['contributors']) > 0}
     
     return JSONResponse({
@@ -237,7 +240,8 @@ async def fetch_channel_videos(request: Request, channelpath: str, db: databases
                 'contributors': [
                     {
                         'name': co['name'],
-                        'discord_id': co['discord_id']
+                        'discord_id': co['discord_id'] if (not co['alternative_contact_info']) else None,
+                        'alternative_contact_info': co['alternative_contact_info']
                     }
                     for co in v['contributors'].values()
                 ]
@@ -604,6 +608,61 @@ async def delete_all_contributions(request: Request, db: databases.Database = De
     
     return JSONResponse({'success': True}, status_code=200)
 
+@app.post('/signup_nodiscord')
+@limiter.limit('5/minute')
+async def create_contributor(request: Request, db: databases.Database = Depends(get_database)):
+    # assert db conn
+    await db.connect()
+    
+    # check perms
+    if not await verify_api_key(db, get_api_key(request), 'allow_create_user'):
+        return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
+    
+    # validate body
+    try:
+        jsonDat = await request.json()
+    except json.decoder.JSONDecodeError:
+        return JSONResponse({'error': 'malformed body'}, status_code=400)
+    
+    # verify value types/presence of keys
+    notnull = {'allow_channel_queries': bool, 'allow_stats_queries': bool, 'name': str, 'alternative_contact_info': str}
+    for k in notnull.keys():
+        if jsonDat.get(k) == None:
+            return JSONResponse({'error': f'{k} cannot be null'}, status_code=400)
+        elif type(jsonDat.get(k)) != notnull[k]:
+            return JSONResponse({'error': f'{k} cannot be type {type(jsonDat[k])}'}, status_code=400)
+    
+    # verify length of name
+    if type(jsonDat['name']) != str or len(jsonDat['name']) > 60:
+        return JSONResponse({'error': 'name must be 60 characters or less'}, status_code=400)
+    elif len(jsonDat['alternative_contact_info'] or '') > 300:
+        return JSONResponse({'error': 'max contact info length is 300 chars'}, status_code=403)
+    elif '\n' in (jsonDat['alternative_contact_info'] or ''):
+        return JSONResponse({'error': 'newlines not permitted in contact info'}, status_code=403)
+    
+    contributor = {
+        'allow_channel_queries': jsonDat['allow_channel_queries'],
+        'allow_stats_queries': jsonDat['allow_stats_queries'],
+        'name': jsonDat['name'],
+        'alternative_contact_info': jsonDat['alternative_contact_info']}
+    
+    # insert contributor
+    row = await db.fetch_one(
+        query='''INSERT INTO contributors (allow_channel_queries, allow_stats_queries, name, alternative_contact_info) VALUES
+            (:allow_channel_queries, :allow_stats_queries, :name, :alternative_contact_info)
+            RETURNING id;''',
+        values=contributor)
+    
+    # insert api key
+    api_key = generate_random(64)
+    await db.execute(query='''
+        INSERT INTO api_keys (application, api_key, allow_submit_contributions, allow_videos_query, allow_channelmaintainers_query, allow_channelvideos_query)
+        VALUES (:application, :api_key, :allow_submit_contributions, TRUE, TRUE, TRUE) ON CONFLICT DO NOTHING''',
+        values={'application': f'manually_added_{int(time.time())}', 'api_key': api_key, 'allow_submit_contributions': row.id})
+    contributor['key'] = api_key
+    
+    return JSONResponse(contributor, status_code=200)
+
 @app.post('/signup')
 @limiter.limit('2/minute')
 async def create_contributor(request: Request, db: databases.Database = Depends(get_database)):
@@ -644,7 +703,7 @@ async def create_contributor(request: Request, db: databases.Database = Depends(
         return JSONResponse({'error': 'contributor already exists'}, status_code=403)
     
     # insert contributor
-    x = await db.execute(
+    await db.execute(
         query='''INSERT INTO contributors (allow_channel_queries, allow_stats_queries, name, discord_id) VALUES
             (:allow_channel_queries, :allow_stats_queries, :name, :discord_id)''',
         values=contributor)
@@ -687,8 +746,35 @@ async def authorize_contributor(request: Request, discord_id: int, db: databases
             '/video/{videopath:path}', '/channelvideos/{channelpath:path}',
             '/channelmaintainers/{channelpath:path}', '/submit_channels',
             '/submit_videos', '/my_videos', '/my_channels', '/my_videos/{videopath:str}',
-            '/my_channels/{channelpath:str}', '/delete_all']
+            '/my_channels/{channelpath:str}', '/delete_all', '/set_contact_info']
         }, status_code=200)
+
+@app.post('/set_contact_info')
+@limiter.limit('2/minute')
+async def update_contact_info(request: Request, db: databases.Database = Depends(get_database)):
+    # assert db conn
+    await db.connect()
+    
+    contributor_id = await verify_api_key(db, get_api_key(request), 'allow_submit_contributions')
+    if type(contributor_id) != int:
+        return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
+    
+    # validate body
+    try:
+        jsonDat = await request.json()
+    except json.decoder.JSONDecodeError:
+        return JSONResponse({'error': 'malformed body'}, status_code=400)
+    if type(jsonDat) != dict or list(jsonDat.keys()) != ['alternative_contact_info']:
+        return JSONResponse({'error': 'missing `alternative_contact_info` key or invalid keys present'}, status_code=400)
+    elif len(jsonDat['alternative_contact_info'] or '') > 300:
+        return JSONResponse({'error': 'max contact info length is 300 chars'}, status_code=403)
+    elif '\n' in (jsonDat['alternative_contact_info'] or ''):
+        return JSONResponse({'error': 'newlines not permitted in contact info'}, status_code=403)
+    
+    # update contributor row
+    await db.execute(query='UPDATE contributors SET alternative_contact_info = :contact_info WHERE id = :cnid', values={'cnid': contributor_id, 'contact_info': jsonDat['alternative_contact_info']})
+    
+    return JSONResponse({'success': True}, status_code=200)
 
 @app.post('/delete_account')
 @limiter.limit('2/minute')

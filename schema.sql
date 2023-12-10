@@ -8,7 +8,8 @@ CREATE TABLE contributors (
 	allow_channel_queries BOOL NOT NULL,
 	allow_stats_queries BOOL NOT NULL,
 	name VARCHAR(60) NOT NULL,
-    discord_id VARCHAR(20) UNIQUE NOT NULL
+    discord_id VARCHAR(20) UNIQUE,
+    alternative_contact_info TEXT
 );
 
 CREATE TABLE formats (
