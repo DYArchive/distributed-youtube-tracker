@@ -264,7 +264,7 @@ async def update_user_contact(command, config, user):
             return f'api error; `{status}`'
         
         # update contact
-        resp = await session.post(config['dya_api_root']+'set_contact_info', headers={'Authorization': json.loads(data)['key']}, json={'alternative_contact_info': contact.strip()})
+        resp = await session.post(config['dya_api_root']+'set_contact_info', headers={'Authorization': json.loads(data)['key']}, json={'alternative_contact_info': contact.strip() or None})
         if resp.status != 200:
             return f'api error; `{status}`'
     
