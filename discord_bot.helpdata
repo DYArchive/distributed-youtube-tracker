@@ -16,7 +16,7 @@
 	* `have bot DM you your api key`
 
 * !tracker update-contact-info {contact info string}
-	* hides your discord id from the api/bot
+	* `hides your discord id from the api/bot`
 
  * !tracker delete-account
 	* `delete your account and contributions from the tracker`
