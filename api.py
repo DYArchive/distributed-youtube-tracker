@@ -55,8 +55,8 @@ async def fetch_video(request: Request, videopath: str, v: str = None, db: datab
     # assert db conn
     await db.connect()
     
-    if not await verify_api_key(db, get_api_key(request), 'allow_videos_query'):
-        return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
+    # if not await verify_api_key(db, get_api_key(request), 'allow_videos_query'):
+        # return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
     
     # match video id
     videopath = v or videopath # accept ?v= query param
@@ -115,8 +115,8 @@ async def fetch_channel_maintainers(request: Request, channelpath: str, db: data
     # assert db conn
     await db.connect()
     
-    if not await verify_api_key(db, get_api_key(request), 'allow_channelmaintainers_query'):
-        return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
+    # if not await verify_api_key(db, get_api_key(request), 'allow_channelmaintainers_query'):
+        # return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
     
     # match channel id
     chn_reg = match_channel_id.match(channelpath)
@@ -170,8 +170,8 @@ async def fetch_channel_videos(request: Request, channelpath: str, db: databases
     # assert db conn
     await db.connect()
     
-    if not await verify_api_key(db, get_api_key(request), 'allow_channelvideos_query'):
-        return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
+    # if not await verify_api_key(db, get_api_key(request), 'allow_channelvideos_query'):
+        # return JSONResponse({'error': 'insufficient permissions'}, status_code=401)
     
     # match channel id
     chn_reg = match_channel_id.match(channelpath)
