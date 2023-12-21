@@ -51,6 +51,6 @@ bot requires following discord perms:
 * send files  
 
 # todo
-* add user video/channel wishlist (should ping for wishlisted videos newly-added to tracker)
 * add statistics/leaderboard queries
-
+* add user video/channel wishlist (should ping for wishlisted videos newly-added to tracker)
+* add a system for requesting video/channel ids from users who have them

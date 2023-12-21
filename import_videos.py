@@ -159,7 +159,6 @@ if __name__ == '__main__':
     parser.add_argument('--api-root-url', help='dya tracker api url', default='https://dya-t-api.strangled.net/api')
     parser.add_argument('--channels', action='store_true', help='insert all channels from tsv as MAINTAINED channels')
     parser.add_argument('--resume', default=0, type=int, help='resume inserting videos/channels by skipping first X videos')
-    parser.add_argument('-l', '--log-file-fmt', default='./logs/{}.log', help='output fmt for log files (curly braces are discord id), default: ./{}.log')
     if len(sys.argv)==1:
         parser.print_help(sys.stderr); exit()
     args = parser.parse_args()
