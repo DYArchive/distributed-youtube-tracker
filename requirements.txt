@@ -3,7 +3,6 @@ argparse
 asyncpg
 databases
 fastapi[all]
-psycopg2
 pydantic
 requests
 slowapi
