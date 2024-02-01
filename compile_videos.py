@@ -72,10 +72,6 @@ def process_info_jsons(args):
                 raise e
             if not channel_id: print(f'error extracting channel id from video {video_id}, continuing anyway')
             
-            # skip unlisted vids if set
-            if (not args.include_unlisted) and (jdat.get('availability', 'public') != 'public'):
-                print(f'skipping video {video_id}, unlisted video'); continue
-            
             # titles
             if args.exclude_titles: video_title = jdat.get('title') or jdat.get('fulltitle'); video_title = strip_vals(video_title)
             else: video_title = None
