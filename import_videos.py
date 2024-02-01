@@ -60,7 +60,7 @@ def insert_videos_and_channels(videos, channels, args, logh, chunksize=500):
                 'id': id,
                 'title': videos[id]['t'],
                 'channel_id': videos[id]['c'],
-                'channel_title': channels[videos[id]['c']]['t'],
+                'channel_title': channels.get(videos[id]['c'], {}).get('t'),
                 'format_id': videos[id]['f'],
                 'filesize': videos[id]['s']
             }
@@ -127,7 +127,7 @@ def main(args):
                         'n': cast_str_as_val(row.get('note'))}
                 elif currentmode == 'v':
                     row = parse_line(line, fields)
-                    if row.get('include') == 'n' or (not row.get('video_id')) or (not row.get('channel_id')):
+                    if row.get('include') == 'n' or (not row.get('video_id')) or ((not row.get('channel_id')) if not args.x else False):
                         echo_msg(f'skipping video {row.get("video_id")} ({row.get("title") or "no title"})', logh); continue
                         continue
                     
@@ -160,6 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('--channels', action='store_true', help='insert all channels from tsv as MAINTAINED channels')
     parser.add_argument('--resume', default=0, type=int, help='resume inserting videos/channels by skipping first X videos')
     parser.add_argument('-l', '--log-file-fmt', default='./logs/{}.log', help='output fmt for log files (curly braces are api key), default: ./{}.log')
+    parser.add_argument('-x', action='store_true', help='allow inserting videos without channel ids')
     if len(sys.argv)==1:
         parser.print_help(sys.stderr); exit()
     args = parser.parse_args()
