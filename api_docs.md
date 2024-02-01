@@ -77,7 +77,7 @@ body:
 delete video from your video contributions  
 
 ## DELETE `/api/my_channels/{channel}`
-delete video from your maintained channels  
+delete channel from your maintained channels list  
 
 ## POST `/api/delete_all`
 delete all video/channel contributions (doesn't remove ids or titles from database)  
