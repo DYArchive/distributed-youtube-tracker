@@ -14,8 +14,9 @@ fetch video id/title/channel/list of contributions
 ## GET `/api/channelmaintainers/{channel}`  
 fetch channel id/title/list of channel maintainers  
 
-## GET `/api/channelvideos/{channel}`
+## GET `/api/channelvideos/{channel}?limit=500&offset=0`
 fetch channel id/title/list of channel's videos/list of video contributors  
+limit of 500 videos per request  
 note: videos only contributed by a user who doesn't allow channel queries will not have the video appear  
 
 ## POST `/api/submit_channels`  
