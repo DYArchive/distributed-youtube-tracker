@@ -1,5 +1,6 @@
 # distributed youtube tracker
 py scripts / db schema / discord bot / api for tracking youtube archives  
+the api is currently located at https://dya-t-api.strangled.net/api  
 
 # py scripts
 compile_videos.py -  
